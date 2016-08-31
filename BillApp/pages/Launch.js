@@ -45,19 +45,18 @@ class Launch extends Component{
         this.timer && clearInterval(this.timer);
         let { navigator } = this.props;
         InteractionManager.runAfterInteractions(() => {
-            navigator.resetTo({
+           navigator.resetTo({
                 title:'bill-list',
                 animate:'FloatFromBottom',
                 Component: MainPage
             });
         });
-        
     }
     componentWillUnmount(){
         this.timer && clearInterval(this.timer);
     }
     componentWillMount(){
-        StatusBar.setBarStyle('light-content',true);
+        //StatusBar.setBarStyle('light-content',true);
         this.timer = setInterval(()=>{
             let timerCount = this.state.timer - 1;
             this.setState({timer:timerCount});

@@ -6,7 +6,7 @@ import {
     NativeModules,
     ListView,
     TouchableHighlight,
-    Modal
+    Modal,
 } from 'react-native';
 import actionCreates from '../Actions';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     paddingLeft:10,
     justifyContent:'center',
     backgroundColor: Utils.selectedColor,
-    
   },
   titleText:{
       fontSize:18,
@@ -91,8 +90,9 @@ class BillList extends Component{
     }
     _backToNative(){
         console.log("back to native");
-        let {ReactPage} = NativeModules;
-        ReactPage.backToNative('react native','Beijing China',Date.now());
+
+        // let {ReactPage} = NativeModules;
+        // ReactPage.backToNative('react native','Beijing China',Date.now());
     }
     _renderRow(rowData, sectionID, rowID, highlightRow){
         console.log("rendersection",rowData, sectionID, rowID, highlightRow);

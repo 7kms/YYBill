@@ -1,5 +1,7 @@
 import React,{Component} from 'react';
 import {
+    View,
+    StatusBar,
     StyleSheet
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -44,26 +46,26 @@ class MainPage extends Component{
     render(){
         let {tabStatus,navigator} = this.props;
         return (
-            <TabNavigator>
-                <TabNavigator.Item
-                    selected={tabStatus.billList.selected}
-                    title="账单列表"
-                    renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                    renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                    badgeText = {tabStatus.billList.badage}
-                    onPress={() => this._changeTab('billList')}>
-                    <BillListView navigator={navigator} title="账单列表"/>
-                </TabNavigator.Item>
-                <TabNavigator.Item
-                    selected={tabStatus.notify.selected}
-                    title="通知"
-                    renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                    renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                    renderBadge={() => tabStatus.notify.badage > 0 ?  <CustomBadgeView badage={tabStatus.notify.badage} /> : null}
-                    onPress={() => this._changeTab('notify')}>
-                    <NotifyView navigator={navigator} title="通知"/>
-                </TabNavigator.Item>
-            </TabNavigator>
+                <TabNavigator>
+                    <TabNavigator.Item
+                        selected={tabStatus.billList.selected}
+                        title="账单列表"
+                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
+                        renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
+                        badgeText = {tabStatus.billList.badage}
+                        onPress={() => this._changeTab('billList')}>
+                        <BillListView navigator={navigator} title="账单列表"/>
+                    </TabNavigator.Item>
+                    <TabNavigator.Item
+                        selected={tabStatus.notify.selected}
+                        title="通知"
+                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
+                        renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
+                        renderBadge={() => tabStatus.notify.badage > 0 ?  <CustomBadgeView badage={tabStatus.notify.badage} /> : null}
+                        onPress={() => this._changeTab('notify')}>
+                        <NotifyView navigator={navigator} title="通知"/>
+                    </TabNavigator.Item>
+                </TabNavigator>
         );
     }
 }
