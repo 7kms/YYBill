@@ -8,3 +8,12 @@ export function billList(state={},action){
             return state;
     }
 }
+
+export function categoryList(state=[],action){
+    switch(action.type){
+        case types.INITICAL_CATEGORY_LIST:
+            return action.categoryList;
+        default:
+            return state;
+    }
+}

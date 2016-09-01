@@ -14,3 +14,6 @@ export const INITICAL_BILL_LIST = 'INITICAL_BILL_LIST';
 export const ADD_BILL = 'ADD_BILL';
 export const UPDATE_BILL ='UPDATE_BILL';
 export const DELETE_BILL = 'DELETE_BILL';
+
+//消费类别
+export const INITICAL_CATEGORY_LIST = 'INITICAL_CATEGORY_LIST';

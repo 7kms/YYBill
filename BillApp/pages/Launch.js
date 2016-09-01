@@ -38,7 +38,7 @@ class Launch extends Component{
     constructor(props){
         super(props);
         this.state = {
-            timer:5
+            timer:3
         }
     }
     _skip(){
@@ -75,7 +75,7 @@ class Launch extends Component{
                     >{this.state.timer}秒跳过</Text>       
                     <Text style={styles.text}> this is a bill app </Text>
                 </Image>
-            </View>       
+            </View>
         );
     }
 }

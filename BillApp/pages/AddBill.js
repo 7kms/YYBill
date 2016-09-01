@@ -4,82 +4,28 @@ import {
     View,
     Text,
     TextInput,
+    ScrollView,
     TouchableOpacity,
     TouchableHighlight
 } from 'react-native';
 import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { CustomButton } from '../Components/public/Button';
-import { Header } from '../Components/public/Header';
+import AddItem from './AddItem';
+
 import actionCreater from '../Actions'
 import Utils from '../Utils';
-const styles = StyleSheet.create({
-    billContent:{
-        flex:1
-    },
-    labelContainer:{
-        flexDirection:'row',
-        alignItems:'center',
-        height: 60,
-    },
-    label:{
-        width:100,
-    },
-    textLabel:{
-        textAlign:'right',
-        color:'#777',
-        fontSize:16
-    },
-    input:{
-        flex:1,
-        marginHorizontal:20,
-    },
-    textInputStyle:{
-        height:40,
-        paddingLeft:10,
-        color:Utils.selectedColor,
-        borderColor:Utils.selectedColor,
-        borderWidth: Utils.pixel
-    },
-    saveContent:{
-        flex:1,
-        height:60,
-        alignItems:'center',
-        justifyContent:'flex-end',
-    },
-    saveBtn:{
-        justifyContent:'center',
-        width:200,
-        height:40,
-        borderRadius:5,
-       // marginBottom:100,
-        backgroundColor:Utils.themeColor,
-    },
-    saveText:{
-        fontSize:14,
-        fontWeight:'bold',
-        color:'#fff',
-        textAlign:'center',
-    }
-});
-class WithLabel extends Component{
-    constructor(props){
-        super(props);
-    }
-    render(){
-        return(
-            <View style={styles.labelContainer}>
-                <View style={styles.label}>
-                    <Text style={styles.textLabel}>{this.props.label}</Text>
-                </View>
-                <View style={styles.input}>
-                    {this.props.children}
-                </View>
-            </View>
-        );
-    }
+
+let tempArr = [];
+for(let i =0;i<20;i++){
+    tempArr.push({icon:"md-bicycle",text:"餐饮"});
 }
 class AddBillView extends Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            activeIndex:0
+        };
+    }
     _back(){
         const {navigator} = this.props;
         navigator.pop();
@@ -98,6 +44,11 @@ class AddBillView extends Component{
         dispatch(actionCreater.addBill(bill));
         console.log(bill);
         navigator.pop();
+    }
+    _selectItem(item,index){
+        this.setState({
+            activeIndex:index
+        });
     }
     _generateHeader(){
         let headerStyles = {
@@ -147,16 +98,12 @@ class AddBillView extends Component{
                 </TouchableOpacity>
                 <View style={headerStyles.btnWrap}>
                     <TouchableOpacity style={[headerStyles.operateBtn,headerStyles.btnLeft]}>
-                        <Text>
-                            支出
-                        </Text>
+                        <Text>支出</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[headerStyles.operateBtn,headerStyles.btnRight]}>
-                        <Text>
-                            收入
-                        </Text>
+                        <Text>收入</Text>
                     </TouchableOpacity>
-            </View>
+                 </View>
            </View>
        );
     }
@@ -192,6 +139,7 @@ class AddBillView extends Component{
                 </View>
                 <View style={{flex:1}}>
                     <TextInput 
+                        ref='money'
                         autoCapitalize="none"
                         autoFocus={true}
                         placeholder="0.00"
@@ -199,11 +147,96 @@ class AddBillView extends Component{
                         keyboardType="numeric"
                         underlineColorAndroid="transparent"
                         selectionColor="#fff"
-                        maxLength={5}
+                        maxLength={6}
                         style={styles.inputTextStyle}
                     />
                 </View>
             </View>
+        );
+    }
+    _generateItems(){
+        const styles = StyleSheet.create({
+            itemWrap:{
+                flex:1,
+                paddingTop:10,
+                paddingHorizontal:10,
+                flexDirection:'row',
+                flexWrap:'wrap',
+                justifyContent:'space-around'
+            },
+            icon:{
+                width:40,
+                height:40,
+                alignItems:'center',
+                justifyContent:'center'
+            },
+            active:{
+                borderColor:'red',
+                borderWidth:Utils.pixel,
+                borderRadius:20
+            },
+            item:{
+                width:60,
+                height:60,
+                marginBottom:10,
+                alignItems:'center',
+                justifyContent:'center',
+            },
+            text:{
+                fontSize:12,
+                color:"#676767"
+            },
+            textActive:{
+                fontSize:14,
+                color:Utils.color.heart
+            }
+        });
+        const {categoryList} = this.props;
+        return (
+            <ScrollView 
+                style={{flex:1}}
+                keyboardShouldPersistTaps = {false}
+            >
+                <View style={styles.itemWrap}>
+                    {categoryList.map((item,index)=>{
+                        let active = index == this.state.activeIndex ? true : false;
+                        return (
+                            <TouchableOpacity 
+                                style={styles.item}
+                                key={index}
+                                onPress={()=>{
+                                    this._selectItem(item,index)
+                                }}
+                            >
+                                <View style={active?[styles.icon,styles.active] : styles.icon}>
+                                    <Icon 
+                                    name={item.iconName} 
+                                    size={active ? 30 : 25} 
+                                    color={active ? Utils.color.heart : item.color}/>
+                                </View>
+                                <Text style={active ?[styles.text,styles.textActive]: [styles.text,{color:item.color}] }>{item.name}</Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                    <TouchableOpacity 
+                            style={styles.item}
+                            onPress={()=>{
+                                this.props.navigator.push({
+                                     title:'添加消费类型',
+                                     Component: AddItem
+                                });
+                            }}
+                            >
+                        <View style={styles.icon}>
+                            <Icon 
+                            name="ios-add-circle-outline"
+                            size={ 25} 
+                            color={Utils.color.grass}/>
+                        </View>
+                        <Text style={styles.text }>添加</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
         );
     }
     render(){
@@ -211,52 +244,14 @@ class AddBillView extends Component{
             <View style={{flex:1}}>
                 {this._generateHeader()}
                 {this._generateInput()}
-                <View style={styles.billContent}>
-                    <WithLabel label="消费金额:">
-                        <TextInput 
-                            style={styles.textInputStyle}
-                            ref='money'
-                            autoCapitalize='none'
-                            autoFocus={false}
-                            keyboardType='numeric'
-                            maxLength={5}
-                            clearButtonMode='while-editing'
-                            placeholder="请输入$$"
-                        />
-                    </WithLabel>
-                     <WithLabel label="消费项目:">
-                        <TextInput 
-                            style={styles.textInputStyle}
-                            ref='category'
-                            placeholder="请输入$$"
-                        />
-                    </WithLabel>
-                    <WithLabel label="描述:">
-                        <TextInput 
-                            style={styles.textInputStyle}
-                            ref='description'
-                            multiline={true}
-                            placeholder="请输入$$"
-                        />
-                    </WithLabel>
-                    <View style={styles.saveContent}>
-                        <TouchableHighlight
-                        activeOpacity={0.8}
-                        underlayColor={Utils.selectedColor}
-                        onPress={()=>this._saveBill()}
-                        style={styles.saveBtn}
-                    >
-                        <Text style={styles.saveText}>
-                            保存
-                        </Text>
-                    </TouchableHighlight>
-                    </View>
-                    
-                </View>
+                {this._generateItems()}
             </View>
         );
     }
 }
 export default connect(state=>{
-    return {}
+    const {categoryList} = state;
+    return {
+        categoryList
+    }
 })(AddBillView);

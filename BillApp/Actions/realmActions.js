@@ -1,6 +1,6 @@
 import * as types from './actionTypes';
 import realm from '../Dao';
-let storeList;
+let storeList,categoryList;
 export function getBillList(){
     if(!storeList){
         storeList =  realm.objects('BillList');
@@ -41,5 +41,48 @@ export function deleteBill(index){
     });
     return (dispatch)=>{
         dispatch(getBillList());
+    }
+}
+export function getCategoryList(){
+    if(!categoryList){
+        categoryList = realm.objects('Category');
+        if(categoryList.length < 1){
+            realm.write(()=>{
+                let category = {
+                    name:'花钱',
+                    iconName:'',
+                    color:''
+                };
+                realm.create('Category',category);
+            });
+        }
+    }
+    return {
+        type:types.INITICAL_CATEGORY_LIST,
+        categoryList
+    }
+}
+export function addCategory(category){
+    realm.write(()=>{
+        realm.create('Category',category);
+    });
+    return (dipatch)=>{
+        dipatch(getCategoryList());
+    }
+}
+export function updateCategory(category){
+     realm.write(()=>{
+        realm.create('Category',category,true);
+    });
+    return (dipatch)=>{
+        dipatch(getCategoryList());
+    }
+}
+export function deleteCategory(category,index){
+     realm.write(()=>{
+        realm.delete(categoryList[index]);
+    });
+    return (dipatch)=>{
+        dipatch(getCategoryList());
     }
 }
