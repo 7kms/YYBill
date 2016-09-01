@@ -7,7 +7,7 @@ import {
 import Launch from './Launch';
 import Util from '../Utils';
 let defaultStatusBar = {
-                        backgroundColor:"rgba(0,0,0,0)",
+                        backgroundColor:"rgba(171, 206, 223, 0.88)",
                         barStyle: "light-content",
                         animate: true,
                         translucent: true
@@ -36,7 +36,10 @@ class App extends Component{
                 initialRoute={{
                     title:'launch',
                     animate:'VerticalUpSwipeJump',
-                    Component:Launch
+                    Component:Launch,
+                    statusBarStyle:{
+                        backgroundColor:'rgba(0,0,0,0)'
+                    }
                 }}
                 
                 configureScene = {(route,routeStack)=>{
@@ -53,7 +56,8 @@ class App extends Component{
                 renderScene={(route,navigator)=>{
                     let {Component,title,statusBarStyle} = route;
                     
-                    let finallyStatusBar =  Object.assign(defaultStatusBar,statusBarStyle);;
+                    let finallyStatusBar =  Object.assign({},defaultStatusBar,statusBarStyle);
+                   // console.log(finallyStatusBar,statusBarStyle);
                     return (
                         <View style={{flex:1}}>
                             <StatusBar {...finallyStatusBar}/>

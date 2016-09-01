@@ -84,7 +84,6 @@ class BillList extends Component{
         let {navigator} = this.props;
         navigator.push({
             title:'添加账单',
-            animate:'FloatFromBottom',
             Component: AddBill
         });
     }

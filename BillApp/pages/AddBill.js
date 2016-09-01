@@ -4,6 +4,7 @@ import {
     View,
     Text,
     TextInput,
+    TouchableOpacity,
     TouchableHighlight
 } from 'react-native';
 import {connect} from 'react-redux';
@@ -51,7 +52,7 @@ const styles = StyleSheet.create({
         width:200,
         height:40,
         borderRadius:5,
-        marginBottom:100,
+       // marginBottom:100,
         backgroundColor:Utils.themeColor,
     },
     saveText:{
@@ -99,19 +100,124 @@ class AddBillView extends Component{
         navigator.pop();
     }
     _generateHeader(){
-       return <Text>header</Text>;
+        let headerStyles = {
+            wrap : {
+                flexDirection:'row',
+                backgroundColor:"#fff",
+                height: Utils.size.navHeight,
+                alignItems:'flex-end',
+                paddingBottom:10
+            },
+            back:{
+                position:'absolute',
+                left: 0,
+                top: 35,
+                width: 40,
+                alignItems:'center'
+            },
+            btnWrap:{
+                flex:1,
+                flexDirection:'row',
+                justifyContent:'center',
+                alignItems:'center'
+            },
+            operateBtn:{
+                paddingVertical:3,
+                paddingHorizontal:25,
+                borderWidth: Utils.pixel,
+                borderColor:'#999'
+            },
+            btnLeft:{
+                borderTopLeftRadius:5,
+                borderBottomLeftRadius:5
+            },
+            btnRight:{
+                borderTopRightRadius:5,
+                borderBottomRightRadius:5
+            },
+            btnActive:{
+                borderColor:Utils.color.heart,
+                color:Utils.color.heart
+            }
+        };
+       return (
+           <View style={headerStyles.wrap}>
+                <TouchableOpacity style={headerStyles.back} onPress={()=>this._back()}>
+                    <Icon name="md-arrow-back"  size={25} color="#bbb"/>
+                </TouchableOpacity>
+                <View style={headerStyles.btnWrap}>
+                    <TouchableOpacity style={[headerStyles.operateBtn,headerStyles.btnLeft]}>
+                        <Text>
+                            支出
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[headerStyles.operateBtn,headerStyles.btnRight]}>
+                        <Text>
+                            收入
+                        </Text>
+                    </TouchableOpacity>
+            </View>
+           </View>
+       );
+    }
+    _generateInput(){
+        const styles = StyleSheet.create({
+            inputContainer:{
+                height:80,
+                flexDirection:'row',
+                alignItems:'center',
+                backgroundColor:Utils.color.heart,
+            },
+            item:{
+                width:100,
+                textAlign:'center',
+                fontSize:20,
+                color:'#fff'
+            },
+            inputTextStyle:{
+                height: 80,
+                marginRight:15,
+                fontSize:30,
+                textAlign:'right',
+                color:'#fff',
+                borderWidth:0,
+                borderColor:'transparent'
+            }
+
+        });
+        return (
+            <View style={styles.inputContainer}>
+                <View>
+                    <Text  style={styles.item}>花钱</Text>
+                </View>
+                <View style={{flex:1}}>
+                    <TextInput 
+                        autoCapitalize="none"
+                        autoFocus={true}
+                        placeholder="0.00"
+                        placeholderTextColor="#ccc"
+                        keyboardType="numeric"
+                        underlineColorAndroid="transparent"
+                        selectionColor="#fff"
+                        maxLength={5}
+                        style={styles.inputTextStyle}
+                    />
+                </View>
+            </View>
+        );
     }
     render(){
         return (
             <View style={{flex:1}}>
                 {this._generateHeader()}
+                {this._generateInput()}
                 <View style={styles.billContent}>
                     <WithLabel label="消费金额:">
                         <TextInput 
                             style={styles.textInputStyle}
                             ref='money'
                             autoCapitalize='none'
-                            autoFocus={true}
+                            autoFocus={false}
                             keyboardType='numeric'
                             maxLength={5}
                             clearButtonMode='while-editing'
