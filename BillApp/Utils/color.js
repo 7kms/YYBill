@@ -5,7 +5,6 @@
     grass:'#34a853'
 };
 export const iconColorArr = [
-    "#ffff00",
     "#ffcc00",
     "#ff9900",
     "#ccff33",
@@ -19,7 +18,9 @@ export const iconColorArr = [
     "#8B008B",
     "#66CDAA",
     "#008B8B",
-    "#76EEC6"
+    "#76EEC6",
+    "#000fff",
+    "#53cac3"
 ];
 
 export default color;

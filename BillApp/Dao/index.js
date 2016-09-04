@@ -4,7 +4,7 @@ const CategorySchema = {
     name:'Category',
     primaryKey:'id',
     properties:{
-        id:'int',
+        id:'string',
         name:'string',
         iconName:'string',
         color:'string'
@@ -32,4 +32,7 @@ const BillListSchema = {
 };
 
 
-export default new Realm({schema:[ BillSchema, BillListSchema,CategorySchema]});
+export default new Realm({
+    schema:[ BillSchema, BillListSchema,CategorySchema],
+    schemaVersion: 1
+});

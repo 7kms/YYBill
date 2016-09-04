@@ -50,8 +50,8 @@ export function getCategoryList(){
             realm.write(()=>{
                 let category = {
                     name:'花钱',
-                    iconName:'',
-                    color:''
+                    iconName:'logo-apple',
+                    color:'#53cac3'
                 };
                 realm.create('Category',category);
             });
