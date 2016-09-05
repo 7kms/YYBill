@@ -12,7 +12,7 @@ export function billList(state={},action){
 export function categoryList(state=[],action){
     switch(action.type){
         case types.INITICAL_CATEGORY_LIST:
-            return action.categoryList;
+            return Object.assign([],action.categoryList);
         default:
             return state;
     }

@@ -8,7 +8,7 @@ import {
     TouchableHighlight,
     Modal,
 } from 'react-native';
-import actionCreates from '../Actions';
+import actionCreater from '../Actions';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux';
 import { Header } from '../Components/public/Header';
@@ -171,7 +171,7 @@ class BillList extends Component{
     }
     componentWillMount(){
         let { dispatch } = this.props;
-        dispatch(actionCreates.getBillList());
+        dispatch(actionCreater.getBillList());
     }
     render (){
         return (

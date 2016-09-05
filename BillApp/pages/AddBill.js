@@ -11,15 +11,16 @@ import {
 } from 'react-native';
 import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Toast from 'react-native-root-toast';
 import AddItem from './AddItem';
 import actionCreater from '../Actions'
 import Util from '../Utils';
-
+let toastIsBusy = false;
 let dsCategory = new ListView.DataSource({
     rowHasChanged:(r1,r2)=> r1 !== r2
 });
 
-class categoryGrid extends Component{
+class CategoryGrid extends Component{
     constructor(props){
         super(props);
         this.state = {
@@ -62,16 +63,14 @@ class categoryGrid extends Component{
     shouldComponentUpdate(nextProps, nextState) {
         return this.shouldupdate;
     }
-    _selectCategory(rowId){
+    _selectCategory(rowId,rowData){
         if(!this.active){
             this.active = true;
-            this.props.selectCategory(rowId);
+            this.props.selectCategory(rowId,rowData);
         }
-    }
+    } 
     render(){
        let {rowId,rowData,activeIndex} = this.props;
-       let activeColor =  '#099';
-       console.log(rowData);
        const styles = StyleSheet.create({
             iconWrap: {
                 justifyContent:'center',
@@ -80,10 +79,7 @@ class categoryGrid extends Component{
                 height:40,
                 borderRadius:20
             },
-            active: {
-                borderWidth: Util.pixel,
-                borderColor: activeColor
-            },
+            
             iconface: {
                 transform:[
                     {scale:this.state.scaleAnim.interpolate({
@@ -93,25 +89,27 @@ class categoryGrid extends Component{
                 ]
             }
         });
-        
         return (
             <TouchableHighlight 
-                onPress={()=>this._selectCategory(rowId)}
+                onPress={()=>this._selectCategory(rowId,rowData)}
                 underlayColor="transparent"
                 accessibilityComponentType="button"
                 >
-                <View style={{width:Util.size.width/4,height:50,justifyContent:'center',alignItems:'center',marginBottom:10}}>
-                    <View style={activeIndex == rowId ?  [styles.iconWrap,styles.active] : [styles.iconWrap]}>
+                <View style={{width:Util.size.width/4,height:60,justifyContent:'center',alignItems:'center',marginBottom:10}}>
+                    <View style={styles.iconWrap}>
                         <Animated.View style={ styles.iconface}>
                             <Icon 
                             name={rowData.iconName} 
                             style={{textAlign:'center'}} 
                             size={22} 
                             color={rowData.color}/>
-                             <Text>{rowData.name}</Text>
                         </Animated.View>
-                       
                     </View>
+                    <Text 
+                        numberOfLines={1}
+                        ellipsizeMode='middle'
+                        style={rowId == activeIndex ? {color:rowData.color} : {color:'#999'}}
+                    >{rowData.name}</Text>
                 </View>
             </TouchableHighlight>
         );
@@ -121,13 +119,34 @@ class AddBillView extends Component{
     constructor(props){
         super(props);
         this.state = {
-            activeIndex:0,
-            dataSource: dsCategory.cloneWithRows(this.props.categoryList)
+            activeIndex:0
         };
     }
     _back(){
         const {navigator} = this.props;
         navigator.pop();
+    }
+    _addBill(){
+        let money = this.refs['money']._lastNativeText;
+        if(!money){
+            if(toastIsBusy){
+                return false;
+            }
+            Toast.show('你输入的金额有误',{
+                duration: Toast.durations.LONG,
+                position: Toast.positions.CENTER,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                onShow(){
+                    toastIsBusy = true;
+                },
+                onHidden(){
+                    toastIsBusy = false;
+                }
+            });
+        }
     }
     _addCategory(){
         this.props.navigator.push({
@@ -135,9 +154,11 @@ class AddBillView extends Component{
             Component: AddItem
         });
     }
-    _selectCategory(item,index){
+    _selectCategory(index,item){
         this.setState({
-            activeIndex:index,
+            activeIndex: index,
+            activeColor: item.color,
+            activeName: item.name,
             dataSource: dsCategory.cloneWithRows(this.props.categoryList)
         });
     }
@@ -203,8 +224,7 @@ class AddBillView extends Component{
             inputContainer:{
                 height:80,
                 flexDirection:'row',
-                alignItems:'center',
-                backgroundColor:Util.color.heart,
+                alignItems:'center'
             },
             item:{
                 width:100,
@@ -222,41 +242,75 @@ class AddBillView extends Component{
                 borderColor:'transparent'
             }
         });
+
+        let {activeColor,activeName} = this.state;
+        if(!activeColor){
+            let item = this.props.categoryList[this.state.activeIndex];
+            activeColor = item.color;
+            activeName = item.name;
+        }
         return (
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer,{backgroundColor:activeColor}]}>
                 <View>
-                    <Text  style={styles.item}>花钱</Text>
+                    <Text  style={styles.item}>{activeName}</Text>
                 </View>
                 <View style={{flex:1}}>
                     <TextInput 
                         ref='money'
+                        style={styles.inputTextStyle}
                         autoCapitalize="none"
-                        autoFocus={true}
                         placeholder="0.00"
                         placeholderTextColor="#ccc"
                         keyboardType="numeric"
                         underlineColorAndroid="transparent"
-                        selectionColor="#fff"
+                       
                         maxLength={6}
-                        style={styles.inputTextStyle}
+                        onSubmitEditing={()=>this._addBill()}
                     />
                 </View>
             </View>
         );
     }
-    _renderCategory(rowData,sectionId,rowId,hightRow){
+    _renderCategory(rowData,sectionId,rowId,hightRow){ 
         return (
-            <categoryGrid 
+            <CategoryGrid 
+                rowData={rowData}
+                rowId={rowId}
                 activeIndex={this.state.activeIndex}
                 selectCategory={this._selectCategory.bind(this)}
             />);
     }
+    componentWillMount(){
+        let { dispatch } = this.props;
+        dispatch(actionCreater.getCategoryList());
+    }
     render(){
+        let styles = StyleSheet.create({
+            emptyWrap:{
+                height:200,
+                alignItems:'center',
+                justifyContent:'center'
+            },
+            btn:{
+                paddingHorizontal:20,
+                paddingVertical:10,
+                backgroundColor:Util.themeColor,
+                borderRadius:10,
+                overflow:'hidden'
+            },
+            text:{
+                fontSize:18,
+                color:'#fff',
+            }
+        });
+        let dataSource =  dsCategory.cloneWithRows(this.props.categoryList);
         return (
             <View style={{flex:1}}>
                 {this._generateHeader()}
-                {this._generateInput()}
-                <View style={{flex:1,height:250}}>
+                {
+                    this.props.categoryList.length >0 ? this._generateInput() : null
+                }
+                <View style={{flex:1}}>
                     {
                        this.props.categoryList.length > 0 
                        ? 
@@ -271,17 +325,48 @@ class AddBillView extends Component{
                             keyboardDismissMode={'on-drag'}
                             initialListSize = {15}
                             pageSize = {5}
-                            dataSource = {this.state.dataSource}
+                            dataSource = {dataSource}
                             renderRow = {this._renderCategory.bind(this)}
                         />
                         :
-                        <Text>还没有任何分类,马上去添加吧!</Text>
+                        <View style={styles.emptyWrap}>
+                            <Text style={{color:'#ccc',fontSize:18}}>还没有任何分类,请先创建!</Text>
+                            <TouchableHighlight 
+                                onPress={()=>this._addCategory()}
+                                underlayColor="transparent"
+                                >
+                                <View style={styles.btn}>
+                                    <Text style={styles.text} onPress={this._addCategory.bind(this)}>添加分类</Text>
+                                </View>
+                            </TouchableHighlight>
+                        </View>
                     }
-                   <View>
-                        <Text onPress={this._addCategory.bind(this)}>添加分类</Text>
+                   </View>
+                   <View style={{height:100,flexDirection:'row',alignItems:'center',justifyContent:'space-around',backgroundColor:'#eee'}}>
+                        {
+                            this.props.categoryList.length > 0 
+                            ?
+                            <TouchableHighlight 
+                                onPress={()=>this._addCategory()}
+                                underlayColor="transparent"
+                                >
+                                <View style={styles.btn}>
+                                    <Text style={styles.text} onPress={this._addBill.bind(this)}>保存账单</Text>
+                                </View>
+                            </TouchableHighlight>
+                            :
+                            null
+                        }
+                        <TouchableHighlight 
+                            onPress={()=>this._addCategory()}
+                            underlayColor="transparent"
+                            >
+                            <View style={styles.btn}>
+                                <Text style={styles.text} onPress={this._addCategory.bind(this)}>添加分类</Text>
+                            </View>
+                        </TouchableHighlight>
                    </View>
                </View>
-            </View>
         );
     }
 }
