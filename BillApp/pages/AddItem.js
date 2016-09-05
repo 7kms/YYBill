@@ -9,13 +9,15 @@ import {
     Animated,
     ListView
 } from 'react-native';
+import Toast from 'react-native-root-toast';
 import { connect } from 'react-redux';
 import { Header } from '../Components/public/Header';
 import { CustomButton } from '../Components/public/Button';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Util from '../Utils';
 import { iconColorArr } from '../Utils/color';
-import actionCreater from '../Actions'
+import actionCreater from '../Actions';
+let toastIsBusy = false;
 let IconNames =  Object.keys(Icon.glyphMap).filter((name,index)=>{
     return index % 15 == 1;
 });
@@ -36,6 +38,8 @@ class ColorGrid extends Component{
     _changeView(props){
         let {rowId,rowData,activeColorIndex} = props;
         if(rowId == activeColorIndex){
+           this.active = true;
+           this.shouldupdate = true;
            Animated.timing(
             this.state.scaleAnim,
             {
@@ -43,17 +47,18 @@ class ColorGrid extends Component{
                 duration:200,
             },
             ).start();
+       }else if(this.active){
+            this.shouldupdate = true;
+            this.active = false;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1,
+                    duration:200,
+                },
+            ).start();
        }else{
-           if(this.active){
-               this.active = false;
-               Animated.timing(
-                    this.state.scaleAnim,
-                    {
-                        toValue:1,
-                        duration:200,
-                    },
-                ).start();
-           }
+           this.shouldupdate = false;
        }
     }
     componentDidMount(){
@@ -61,6 +66,9 @@ class ColorGrid extends Component{
     }
     componentWillReceiveProps(nextProps){
         this._changeView(nextProps);
+    }
+    shouldComponentUpdate(nextProps,nextState){
+        return this.shouldupdate;
     }
     _selectColor(rowId){
         if(!this.active){
@@ -118,31 +126,37 @@ class IconGrid extends Component{
     _changeView(props){
         let {rowId,rowData,activeIconIndex} = props;
         if(rowId == activeIconIndex){
-           Animated.timing(
-            this.state.scaleAnim,
-            {
-                toValue:1.5,
-                duration:200,
-            },
+            this.active = true;
+            this.shouldupdate = true;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1.5,
+                    duration:200,
+                },
             ).start();
-       }else{
-           if(this.active){
-               this.active = false;
-               Animated.timing(
-                    this.state.scaleAnim,
-                    {
-                        toValue:1,
-                        duration:200,
-                    },
-                ).start();
-           }
-       }
+        }else if(this.active){
+            this.shouldupdate = true;
+            this.active = false;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1,
+                    duration:200,
+                },
+            ).start();
+        }else{
+            this.shouldupdate = false;
+        }
     }
     componentDidMount(){
         this._changeView(this.props);
     }
     componentWillReceiveProps(nextProps){
        this._changeView(nextProps);
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.shouldupdate;
     }
     _selectIcon(rowId){
         if(!this.active){
@@ -222,8 +236,7 @@ class ResultPanle extends Component{
         });
     }
     _submit(){
-        let text = this.refs['category']._lastNativeText;
-        this.props.submit(text);
+        this.props.submit();
     }
     render(){
         let {name=IconNames[0],color=iconColorArr[0]} = this.props;
@@ -236,7 +249,9 @@ class ResultPanle extends Component{
                     <View style={styles.textContent}>
                         <TextInput 
                             style={styles.text}
-                            ref="category"
+                            ref={(textInput)=>{
+                                this.props.setTextInput(textInput);
+                            }}
                             placeholderTextColor="#777"
                             placeholder="请输入类别的名称"
                             autoCapitalize={'none'}
@@ -260,8 +275,35 @@ class AddItemView extends Component{
              colorDataSource: dsColor.cloneWithRows(iconColorArr)
          };
      }
-     _save(name){
-         let {dispatch} = this.props;
+     _checkCategory(category){
+         if(!category){
+             return false;
+         }
+         let reg = /(^\s*)|(\s*$)/ig;
+         let str = category.replace(reg,'');
+         return str.length > 1 && str.length < 10;
+     }
+     _save(){
+         let name = this.textInput._lastNativeText;
+         if(!this._checkCategory(name)){
+           if(toastIsBusy)return false;
+           Toast.show('输入有误!', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.CENTER,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                onShow(){
+                    toastIsBusy = true;
+                },
+                onHidden(){
+                    toastIsBusy = false;
+                }
+            });
+            return false;
+         }
+         let { dispatch } = this.props;
          let iconName = IconNames[this.state.activeIconIndex];
          let color = iconColorArr[this.state.activeColorIndex];
          let id = Util.guid();
@@ -272,6 +314,9 @@ class AddItemView extends Component{
                 color
          }));
          this.props.navigator.pop();
+     }
+     _setTextInput(textInput){
+         this.textInput = textInput;
      }
      _generateHeader(){
         const leftButton = (<CustomButton leftIcon={<Icon name="md-arrow-back" size={20} color="#fff"/>} onPress={()=>this.props.navigator.pop()}/>);
@@ -292,7 +337,6 @@ class AddItemView extends Component{
              });
     }
     _renderColor(rowData:string,sectionId:number,rowId,hightRow){
-        console.log(rowData,rowId);
         return (<ColorGrid 
                 rowData={rowData} 
                 rowId={rowId} 
@@ -301,7 +345,6 @@ class AddItemView extends Component{
                 />);
     }
     _renderIcon(rowData:string,sectionId:number,rowId,hightRow){
-        console.log("renderIcon")
         return (<IconGrid 
                 rowData={rowData} 
                 rowId={rowId} 
@@ -318,6 +361,7 @@ class AddItemView extends Component{
                 name={IconNames[this.state.activeIconIndex]}
                 color={iconColorArr[this.state.activeColorIndex]}
                 submit={this._save.bind(this)}
+                setTextInput = {this._setTextInput.bind(this)}
                />
                <View style={{flex:1,height:250}}>
                     <Text>请选择一个图标吧</Text>

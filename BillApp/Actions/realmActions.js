@@ -46,16 +46,6 @@ export function deleteBill(index){
 export function getCategoryList(){
     if(!categoryList){
         categoryList = realm.objects('Category');
-        if(categoryList.length < 1){
-            realm.write(()=>{
-                let category = {
-                    name:'花钱',
-                    iconName:'logo-apple',
-                    color:'#53cac3'
-                };
-                realm.create('Category',category);
-            });
-        }
     }
     return {
         type:types.INITICAL_CATEGORY_LIST,

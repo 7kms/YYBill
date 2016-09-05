@@ -4,50 +4,141 @@ import {
     View,
     Text,
     TextInput,
-    ScrollView,
+    ListView,
+    Animated,
     TouchableOpacity,
     TouchableHighlight
 } from 'react-native';
 import {connect} from 'react-redux';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AddItem from './AddItem';
-
 import actionCreater from '../Actions'
-import Utils from '../Utils';
+import Util from '../Utils';
 
-let tempArr = [];
-for(let i =0;i<20;i++){
-    tempArr.push({icon:"md-bicycle",text:"餐饮"});
+let dsCategory = new ListView.DataSource({
+    rowHasChanged:(r1,r2)=> r1 !== r2
+});
+
+class categoryGrid extends Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            activeIndex: this.props.activeIndex,
+            scaleAnim: new Animated.Value(1)
+        };
+    }
+    _changeView(props){
+        let {rowId,rowData,activeIndex} = props;
+        if(rowId == activeIndex){
+            this.active = true;
+            this.shouldupdate = true;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1.5,
+                    duration:200,
+                },
+            ).start();
+        }else if(this.active){
+            this.shouldupdate = true;
+            this.active = false;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1,
+                    duration:200,
+                },
+            ).start();
+        }else{
+            this.shouldupdate = false;
+        }
+    }
+    componentDidMount(){
+        this._changeView(this.props);
+    }
+    componentWillReceiveProps(nextProps){
+       this._changeView(nextProps);
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.shouldupdate;
+    }
+    _selectCategory(rowId){
+        if(!this.active){
+            this.active = true;
+            this.props.selectCategory(rowId);
+        }
+    }
+    render(){
+       let {rowId,rowData,activeIndex} = this.props;
+       let activeColor =  '#099';
+       console.log(rowData);
+       const styles = StyleSheet.create({
+            iconWrap: {
+                justifyContent:'center',
+                alignItems:'center',
+                width:40,
+                height:40,
+                borderRadius:20
+            },
+            active: {
+                borderWidth: Util.pixel,
+                borderColor: activeColor
+            },
+            iconface: {
+                transform:[
+                    {scale:this.state.scaleAnim.interpolate({
+                        inputRange:[1,2],
+                        outputRange:[1,2]
+                    })}
+                ]
+            }
+        });
+        
+        return (
+            <TouchableHighlight 
+                onPress={()=>this._selectCategory(rowId)}
+                underlayColor="transparent"
+                accessibilityComponentType="button"
+                >
+                <View style={{width:Util.size.width/4,height:50,justifyContent:'center',alignItems:'center',marginBottom:10}}>
+                    <View style={activeIndex == rowId ?  [styles.iconWrap,styles.active] : [styles.iconWrap]}>
+                        <Animated.View style={ styles.iconface}>
+                            <Icon 
+                            name={rowData.iconName} 
+                            style={{textAlign:'center'}} 
+                            size={22} 
+                            color={rowData.color}/>
+                             <Text>{rowData.name}</Text>
+                        </Animated.View>
+                       
+                    </View>
+                </View>
+            </TouchableHighlight>
+        );
+    }
 }
 class AddBillView extends Component{
     constructor(props){
         super(props);
         this.state = {
-            activeIndex:0
+            activeIndex:0,
+            dataSource: dsCategory.cloneWithRows(this.props.categoryList)
         };
     }
     _back(){
         const {navigator} = this.props;
         navigator.pop();
     }
-    _saveBill(){
-        const {navigator,dispatch} = this.props;
-        let money = parseFloat(this.refs['money']._lastNativeText);
-        let category = this.refs['category']._lastNativeText;
-        let description = this.refs['description']._lastNativeText;
-        let bill = {
-            money,
-            category,
-            description,
-            time: new Date()
-        };
-        dispatch(actionCreater.addBill(bill));
-        console.log(bill);
-        navigator.pop();
+    _addCategory(){
+        this.props.navigator.push({
+            title:'添加分类',
+            Component: AddItem
+        });
     }
-    _selectItem(item,index){
+    _selectCategory(item,index){
         this.setState({
-            activeIndex:index
+            activeIndex:index,
+            dataSource: dsCategory.cloneWithRows(this.props.categoryList)
         });
     }
     _generateHeader(){
@@ -55,7 +146,7 @@ class AddBillView extends Component{
             wrap : {
                 flexDirection:'row',
                 backgroundColor:"#fff",
-                height: Utils.size.navHeight,
+                height: Util.size.navHeight,
                 alignItems:'flex-end',
                 paddingBottom:10
             },
@@ -75,7 +166,7 @@ class AddBillView extends Component{
             operateBtn:{
                 paddingVertical:3,
                 paddingHorizontal:25,
-                borderWidth: Utils.pixel,
+                borderWidth: Util.pixel,
                 borderColor:'#999'
             },
             btnLeft:{
@@ -87,8 +178,8 @@ class AddBillView extends Component{
                 borderBottomRightRadius:5
             },
             btnActive:{
-                borderColor:Utils.color.heart,
-                color:Utils.color.heart
+                borderColor:Util.color.heart,
+                color:Util.color.heart
             }
         };
        return (
@@ -113,7 +204,7 @@ class AddBillView extends Component{
                 height:80,
                 flexDirection:'row',
                 alignItems:'center',
-                backgroundColor:Utils.color.heart,
+                backgroundColor:Util.color.heart,
             },
             item:{
                 width:100,
@@ -130,7 +221,6 @@ class AddBillView extends Component{
                 borderWidth:0,
                 borderColor:'transparent'
             }
-
         });
         return (
             <View style={styles.inputContainer}>
@@ -154,97 +244,43 @@ class AddBillView extends Component{
             </View>
         );
     }
-    _generateItems(){
-        const styles = StyleSheet.create({
-            itemWrap:{
-                flex:1,
-                paddingTop:10,
-                paddingHorizontal:10,
-                flexDirection:'row',
-                flexWrap:'wrap',
-                justifyContent:'space-around'
-            },
-            icon:{
-                width:40,
-                height:40,
-                alignItems:'center',
-                justifyContent:'center'
-            },
-            active:{
-                borderColor:'red',
-                borderWidth:Utils.pixel,
-                borderRadius:20
-            },
-            item:{
-                width:60,
-                height:60,
-                marginBottom:10,
-                alignItems:'center',
-                justifyContent:'center',
-            },
-            text:{
-                fontSize:12,
-                color:"#676767"
-            },
-            textActive:{
-                fontSize:14,
-                color:Utils.color.heart
-            }
-        });
-        const {categoryList} = this.props;
+    _renderCategory(rowData,sectionId,rowId,hightRow){
         return (
-            <ScrollView 
-                style={{flex:1}}
-                keyboardShouldPersistTaps = {false}
-            >
-                <View style={styles.itemWrap}>
-                    {categoryList.map((item,index)=>{
-                        let active = index == this.state.activeIndex ? true : false;
-                        return (
-                            <TouchableOpacity 
-                                style={styles.item}
-                                key={index}
-                                onPress={()=>{
-                                    this._selectItem(item,index)
-                                }}
-                            >
-                                <View style={active?[styles.icon,styles.active] : styles.icon}>
-                                    <Icon 
-                                    name={item.iconName} 
-                                    size={active ? 30 : 25} 
-                                    color={active ? Utils.color.heart : item.color}/>
-                                </View>
-                                <Text style={active ?[styles.text,styles.textActive]: [styles.text,{color:item.color}] }>{item.name}</Text>
-                            </TouchableOpacity>
-                        );
-                    })}
-                    <TouchableOpacity 
-                            style={styles.item}
-                            onPress={()=>{
-                                this.props.navigator.push({
-                                     title:'添加消费类型',
-                                     Component: AddItem
-                                });
-                            }}
-                            >
-                        <View style={styles.icon}>
-                            <Icon 
-                            name="ios-add-circle-outline"
-                            size={ 25} 
-                            color={Utils.color.grass}/>
-                        </View>
-                        <Text style={styles.text }>添加</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        );
+            <categoryGrid 
+                activeIndex={this.state.activeIndex}
+                selectCategory={this._selectCategory.bind(this)}
+            />);
     }
     render(){
         return (
             <View style={{flex:1}}>
                 {this._generateHeader()}
                 {this._generateInput()}
-                {this._generateItems()}
+                <View style={{flex:1,height:250}}>
+                    {
+                       this.props.categoryList.length > 0 
+                       ? 
+                        <ListView 
+                            style={{flex:1}}
+                            enableEmptySections={true}
+                            contentContainerStyle={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                                alignItems: 'flex-start'
+                            }}
+                            keyboardDismissMode={'on-drag'}
+                            initialListSize = {15}
+                            pageSize = {5}
+                            dataSource = {this.state.dataSource}
+                            renderRow = {this._renderCategory.bind(this)}
+                        />
+                        :
+                        <Text>还没有任何分类,马上去添加吧!</Text>
+                    }
+                   <View>
+                        <Text onPress={this._addCategory.bind(this)}>添加分类</Text>
+                   </View>
+               </View>
             </View>
         );
     }

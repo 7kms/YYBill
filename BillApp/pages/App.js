@@ -2,7 +2,9 @@ import React,{Component} from 'react';
 import {
     View,
     StatusBar,
-    Navigator
+    Navigator,
+    BackAndroid,
+    ToastAndroid
 } from 'react-native';
 import Launch from './Launch';
 import Util from '../Utils';
@@ -16,23 +18,43 @@ class App extends Component{
     constructor(props){
         super(props);
     }
+    static lastBackPressed = null;
+    static navigator = null;
+    _onBackPressed(){
+        const nav = App.navigator;
+        let routers;
+        if(!nav)return false;
+        routers = nav.getCurrentRoutes();
+        if(routers.length > 1){
+            nav.pop();
+            return true;
+        }else{
+          if(App.lastBackPressed && App.lastBackPressed + 2000 > Date.now()){
+                return false;
+            }else{
+                ToastAndroid.show('再按一次退出应用',ToastAndroid.SHORT);
+                App.lastBackPressed = Date.now();
+                return true;
+            }
+        }
+    }
+    componentWillMount(){
+        if(Util.OS === 'android'){
+            BackAndroid.addEventListener('hardwareBackPress',this._onBackPressed);
+        }
+    }
+    componentWillUnmount(){
+        if(Util.OS === 'android'){
+            BackAndroid.removeEventListener('hardwareBackPress',this._onBackPressed);
+        }
+    }
     render(){
         return(
             //创建应用的根导航(路由)
-            /**
-             * 
-             *  Navigator.SceneConfigs.PushFromRight (默认)
-                Navigator.SceneConfigs.FloatFromRight
-                Navigator.SceneConfigs.FloatFromLeft
-                Navigator.SceneConfigs.FloatFromBottom
-                Navigator.SceneConfigs.FloatFromBottomAndroid
-                Navigator.SceneConfigs.FadeAndroid
-                Navigator.SceneConfigs.HorizontalSwipeJump
-                Navigator.SceneConfigs.HorizontalSwipeJumpFromRight
-                Navigator.SceneConfigs.VerticalUpSwipeJump
-                Navigator.SceneConfigs.VerticalDownSwipeJump
-             */
             <Navigator
+                ref={(navigator)=>{
+                    App.navigator = navigator;
+                }}
                 initialRoute={{
                     title:'launch',
                     animate:'VerticalUpSwipeJump',
@@ -41,11 +63,9 @@ class App extends Component{
                         backgroundColor:'rgba(0,0,0,0)'
                     }
                 }}
-                
                 configureScene = {(route,routeStack)=>{
                     //return Navigator.SceneConfigs.FloatFromBottom;
                     if(route.animate){
-                        //return Navigator.SceneConfigs.FloatFromBottom;
                         return Navigator.SceneConfigs[route.animate];
                     }else if(Util.OS === 'android'){
                         return Navigator.SceneConfigs.FadeAndroid;
@@ -55,7 +75,6 @@ class App extends Component{
                 }}
                 renderScene={(route,navigator)=>{
                     let {Component,title,statusBarStyle} = route;
-                    
                     let finallyStatusBar =  Object.assign({},defaultStatusBar,statusBarStyle);
                    // console.log(finallyStatusBar,statusBarStyle);
                     return (
