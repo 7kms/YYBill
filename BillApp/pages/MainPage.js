@@ -2,6 +2,7 @@ import React,{Component} from 'react';
 import {
     View,
     StatusBar,
+    Text,
     StyleSheet
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -45,25 +46,48 @@ class MainPage extends Component{
     }
     render(){
         let {tabStatus,navigator} = this.props;
+        let iconSize = 25;
         return (
                 <TabNavigator>
                     <TabNavigator.Item
                         selected={tabStatus.billList.selected}
-                        title="账单列表"
-                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                        renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                        badgeText = {tabStatus.billList.badage}
-                        onPress={() => this._changeTab('billList')}>
-                        <BillListView navigator={navigator} title="账单列表"/>
+                        title="记账"
+                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        onPress={() => this._changeTab('billList')}
+                        badgeText={1}
+                        >
+                        <BillListView navigator={navigator} title="账单"/>
                     </TabNavigator.Item>
                     <TabNavigator.Item
-                        selected={tabStatus.notify.selected}
-                        title="通知"
-                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                        renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={20} color={Utils.themeColor}/>}
-                        renderBadge={() => tabStatus.notify.badage > 0 ?  <CustomBadgeView badage={tabStatus.notify.badage} /> : null}
-                        onPress={() => this._changeTab('notify')}>
-                        <NotifyView navigator={navigator} title="通知"/>
+                        selected={tabStatus.chart.selected}
+                        title="报表"
+                        renderIcon={() => <Icon name="ios-pulse-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderSelectedIcon={() => <Icon name="ios-pulse" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        onPress={() => this._changeTab('chart')}>
+                         <View>
+                            <Text>报表</Text>
+                        </View>
+                    </TabNavigator.Item>
+                    <TabNavigator.Item
+                        selected={tabStatus.finance.selected}
+                        title="资金"
+                        renderIcon={() => <Icon name="logo-bitcoin" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderSelectedIcon={() => <Icon name="logo-bitcoin" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        onPress={() => this._changeTab('finance')}>
+                        <View>
+                            <Text>资金</Text>
+                        </View>
+                    </TabNavigator.Item>
+                    <TabNavigator.Item
+                        selected={tabStatus.more.selected}
+                        title="更多"
+                        renderIcon={() => <Icon name="ios-at-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderSelectedIcon={() => <Icon name="ios-at" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        onPress={() => this._changeTab('more')}>
+                        <View>
+                            <Text>更多</Text>
+                        </View>
                     </TabNavigator.Item>
                 </TabNavigator>
         );

@@ -42,3 +42,8 @@ android/keystores/debug.keystore
 
 # vscode
 .vscode/
+
+*.jks
+*.keystore
+*.bundle
+*.apk

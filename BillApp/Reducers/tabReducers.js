@@ -4,7 +4,15 @@ let Tabs = {
         selected:true,
         badage:0
     },
-    notify:{
+     chart:{
+        selected:true,
+        badage:0
+    },
+     finance:{
+        selected:true,
+        badage:0
+    },
+    more:{
         selected:false,
         badage:0
     }
