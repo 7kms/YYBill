@@ -122,16 +122,20 @@ class AddBillView extends Component{
             activeIndex:0
         };
     }
+    _checkMoney(money){
+        var reg = /(^[1-9]\d*\.?\d*$)|(^0\.?\d*[1-9]\d*$)/;
+        if(typeof money == 'undefined'){
+            return false;
+        }
+        return reg.test(money);
+    }
     _back(){
         const {navigator} = this.props;
         navigator.pop();
     }
     _addBill(){
         let money = this.refs['money']._lastNativeText;
-        if(!money){
-            if(toastIsBusy){
-                return false;
-            }
+        if(!this._checkMoney(money)){
             Toast.show('你输入的金额有误',{
                 duration: Toast.durations.LONG,
                 position: Toast.positions.CENTER,
@@ -146,7 +150,18 @@ class AddBillView extends Component{
                     toastIsBusy = false;
                 }
             });
+            return false;
         }
+        money = parseFloat(money);
+        let { categoryList,dispatch } = this.props;
+        let category = categoryList[this.state.activeIndex];
+        console.log(category);
+        dispatch(actionCreater.addBill({
+            description:'',
+            time: new Date(),
+            money,
+            category
+        }));
     }
     _addCategory(){
         this.props.navigator.push({
@@ -263,7 +278,6 @@ class AddBillView extends Component{
                         placeholderTextColor="#ccc"
                         keyboardType="numeric"
                         underlineColorAndroid="transparent"
-                       
                         maxLength={6}
                         onSubmitEditing={()=>this._addBill()}
                     />
@@ -347,11 +361,11 @@ class AddBillView extends Component{
                             this.props.categoryList.length > 0 
                             ?
                             <TouchableHighlight 
-                                onPress={()=>this._addCategory()}
+                               onPress={this._addBill.bind(this)}
                                 underlayColor="transparent"
                                 >
                                 <View style={styles.btn}>
-                                    <Text style={styles.text} onPress={this._addBill.bind(this)}>保存账单</Text>
+                                    <Text style={styles.text} >保存账单</Text>
                                 </View>
                             </TouchableHighlight>
                             :

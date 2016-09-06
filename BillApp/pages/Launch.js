@@ -6,7 +6,6 @@ import {
     StyleSheet,
     View,
     Text,
-    StatusBar,
     InteractionManager,
     Image
 } from 'react-native';
@@ -56,7 +55,6 @@ class Launch extends Component{
         this.timer && clearInterval(this.timer);
     }
     componentWillMount(){
-        //StatusBar.setBarStyle('light-content',true);
         this.timer = setInterval(()=>{
             let timerCount = this.state.timer - 1;
             this.setState({timer:timerCount});

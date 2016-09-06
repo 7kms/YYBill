@@ -98,32 +98,34 @@ class BillList extends Component{
         return (
             <TouchableHighlight
                 //activeOpacity={0.1}
-                onderlayColor="#abcdef"
+                onderlayColor="transparent"
                 onPress={()=>{
                     this._goUpdateBill(rowData,rowID);
                 }}
             >
                 <View style={styles.billRow}>
-                   <View style={styles.billInfo}>
+                    <View style={styles.billInfo}>
                         <View style={styles.billItem}>
                             <Text style={styles.itemDfn}>金额</Text>
                             <Text style={{color:'#ff9340'}}>{rowData.money}</Text>
                         </View> 
                         <View style={styles.billItem}>
-                            <Text style={styles.itemDfn}>分类</Text>
-                            <Text style={{color:'#777'}}>{rowData.category}</Text>
+                             <Text style={styles.itemDfn}>分类</Text>
+                             <View>
+                                <Text style={{color:'#777'}}>{rowData.category.name}</Text>
+                                <Icon name={rowData.category.iconName} size={20} color={rowData.category.color}/>
+                             </View>
                         </View>
                         <View style={styles.billItem}>
                             <Text style={styles.itemDfn}>时间</Text>
                             <Text style={{color:'#777'}}>{rowData.time.getMonth() + '月' + rowData.time.getDate() + '日'}</Text>
                         </View>
-                   </View>                   
+                    </View>                   
                     <View style={styles.billDesc}>
                         <Text style={{flex:1,textAlign:'center',color:'#777'}}>备注</Text>
                         <Text style={{flex:2,textAlign:'right',marginRight:10,color:'#777'}} numberOfLines={1}>{rowData.description}</Text>
                     </View>
                 </View>
-                                
             </TouchableHighlight>
             
         );
