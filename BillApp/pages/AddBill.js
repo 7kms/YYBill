@@ -136,6 +136,7 @@ class AddBillView extends Component{
     _addBill(){
         let money = this.refs['money']._lastNativeText;
         if(!this._checkMoney(money)){
+            if(toastIsBusy) return false;
             Toast.show('你输入的金额有误',{
                 duration: Toast.durations.LONG,
                 position: Toast.positions.CENTER,
@@ -153,7 +154,7 @@ class AddBillView extends Component{
             return false;
         }
         money = parseFloat(money);
-        let { categoryList,dispatch } = this.props;
+        let { categoryList,dispatch ,navigator} = this.props;
         let category = categoryList[this.state.activeIndex];
         console.log(category);
         dispatch(actionCreater.addBill({
@@ -162,6 +163,7 @@ class AddBillView extends Component{
             money,
             category
         }));
+        navigator.pop();
     }
     _addCategory(){
         this.props.navigator.push({
@@ -301,7 +303,7 @@ class AddBillView extends Component{
     render(){
         let styles = StyleSheet.create({
             emptyWrap:{
-                height:200,
+                flex:1,
                 alignItems:'center',
                 justifyContent:'center'
             },
@@ -345,14 +347,7 @@ class AddBillView extends Component{
                         :
                         <View style={styles.emptyWrap}>
                             <Text style={{color:'#ccc',fontSize:18}}>还没有任何分类,请先创建!</Text>
-                            <TouchableHighlight 
-                                onPress={()=>this._addCategory()}
-                                underlayColor="transparent"
-                                >
-                                <View style={styles.btn}>
-                                    <Text style={styles.text} onPress={this._addCategory.bind(this)}>添加分类</Text>
-                                </View>
-                            </TouchableHighlight>
+                            
                         </View>
                     }
                    </View>

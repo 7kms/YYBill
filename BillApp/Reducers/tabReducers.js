@@ -5,11 +5,11 @@ let Tabs = {
         badage:0
     },
      chart:{
-        selected:true,
+        selected:false,
         badage:0
     },
      finance:{
-        selected:true,
+        selected:false,
         badage:0
     },
     more:{

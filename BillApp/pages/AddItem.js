@@ -231,6 +231,7 @@ class ResultPanle extends Component{
                 justifyContent:'center',
             },
             text:{
+                borderWidth:0,
                 color:'#777'
             }
         });
@@ -252,6 +253,7 @@ class ResultPanle extends Component{
                             ref={(textInput)=>{
                                 this.props.setTextInput(textInput);
                             }}
+                            multiline={false}
                             placeholderTextColor="#777"
                             placeholder="请输入类别的名称"
                             autoCapitalize={'none'}

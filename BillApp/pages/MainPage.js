@@ -7,20 +7,24 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import actionCreaters from '../Actions';
-import CustomBadgeView from '../Components/CustomBadge';
 import BillListView from './BillList';
-import NotifyView from './Notify';
-
+import Finance from './Finance';
+import Charts from './Charts';
+import More from './More';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TabNavigator from 'react-native-tab-navigator';
 
 import Utils from '../Utils';
 const styles = StyleSheet.create({
     itemIcon:{
-        width:100,
-        textAlign: 'center',
         alignItems:'center',
         justifyContent:'center'
+    },
+    normal:{
+        color:'#999'
+    },
+    active:{
+        color:Utils.themeColor
     }
 });
 class MainPage extends Component{
@@ -31,7 +35,15 @@ class MainPage extends Component{
                 selected:false,
                 badage:0
             },
-            notify:{
+            chart:{
+                selected:false,
+                badage:0
+            },
+            finance:{
+                selected:false,
+                badage:0
+            },
+            more:{
                 selected:false,
                 badage:0
             }
@@ -50,44 +62,54 @@ class MainPage extends Component{
         return (
                 <TabNavigator>
                     <TabNavigator.Item
+                        titleStyle={styles.normal}
+                        selectedTitleStyle={styles.active}
                         selected={tabStatus.billList.selected}
                         title="记账"
-                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={iconSize} color='#999'/>}
                         renderSelectedIcon={() => <Icon name="ios-list-box-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
                         onPress={() => this._changeTab('billList')}
-                        badgeText={1}
                         >
-                        <BillListView navigator={navigator} title="账单"/>
+                        {
+                            <BillListView navigator={navigator} title="账单"/>
+                        }
                     </TabNavigator.Item>
                     <TabNavigator.Item
-                        selected={tabStatus.chart.selected}
-                        title="报表"
-                        renderIcon={() => <Icon name="ios-pulse-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
-                        renderSelectedIcon={() => <Icon name="ios-pulse" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
-                        onPress={() => this._changeTab('chart')}>
-                         <View>
-                            <Text>报表</Text>
-                        </View>
-                    </TabNavigator.Item>
-                    <TabNavigator.Item
+                        titleStyle={styles.normal}
+                        selectedTitleStyle={styles.active}
                         selected={tabStatus.finance.selected}
                         title="资金"
-                        renderIcon={() => <Icon name="logo-bitcoin" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderIcon={() => <Icon name="logo-bitcoin" style={styles.itemIcon} size={iconSize} color='#999'/>}
                         renderSelectedIcon={() => <Icon name="logo-bitcoin" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
                         onPress={() => this._changeTab('finance')}>
-                        <View>
-                            <Text>资金</Text>
-                        </View>
+                        {
+                        <Finance />
+                        }
                     </TabNavigator.Item>
                     <TabNavigator.Item
+                        titleStyle={styles.normal}
+                        selectedTitleStyle={styles.active}
                         selected={tabStatus.more.selected}
                         title="更多"
-                        renderIcon={() => <Icon name="ios-at-outline" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        renderIcon={() => <Icon name="ios-at-outline" style={styles.itemIcon} size={iconSize} color='#999'/>}
                         renderSelectedIcon={() => <Icon name="ios-at" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
                         onPress={() => this._changeTab('more')}>
-                        <View>
-                            <Text>更多</Text>
-                        </View>
+
+                        {
+                            <More />  
+                        }
+                    </TabNavigator.Item>
+                    <TabNavigator.Item
+                        titleStyle={styles.normal}
+                        selectedTitleStyle={styles.active}
+                        selected={tabStatus.chart.selected}
+                        title="报表"
+                        renderIcon={() => <Icon name="ios-pulse-outline" style={styles.itemIcon} size={iconSize} color='#999'/>}
+                        renderSelectedIcon={() => <Icon name="ios-pulse" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        onPress={() => this._changeTab('chart')}>
+                       {
+                        <Charts />
+                       }
                     </TabNavigator.Item>
                 </TabNavigator>
         );
@@ -99,3 +121,5 @@ export default connect((state)=>{
         tabStatus
     }
 })(MainPage);
+
+

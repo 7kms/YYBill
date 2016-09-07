@@ -118,7 +118,7 @@ class BillList extends Component{
                         </View>
                         <View style={styles.billItem}>
                             <Text style={styles.itemDfn}>时间</Text>
-                            <Text style={{color:'#777'}}>{rowData.time.getMonth() + '月' + rowData.time.getDate() + '日'}</Text>
+                            <Text style={{color:'#777'}}>{rowData.time.getMonth()+1 + '月' + rowData.time.getDate() + '日'}</Text>
                         </View>
                     </View>                   
                     <View style={styles.billDesc}>
