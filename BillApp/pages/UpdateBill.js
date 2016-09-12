@@ -26,7 +26,7 @@ class CategoryGrid extends Component{
     constructor(props){
         super(props);
         this.state = {
-            activeIndex: this.props.activeIndex,
+            activeId: this.props.bill.id,
             scaleAnim: new Animated.Value(1)
         };
     }
@@ -68,11 +68,11 @@ class CategoryGrid extends Component{
     _selectCategory(rowId,rowData){
         if(!this.active){
             this.active = true;
-            this.props.selectCategory(rowId,rowData);
+            this.props.selectCategory(rowData);
         }
     } 
     render(){
-       let {rowId,rowData,activeIndex} = this.props;
+       let {rowId,rowData,activeId} = this.props;
        const styles = StyleSheet.create({
             iconWrap: {
                 justifyContent:'center',
@@ -110,7 +110,7 @@ class CategoryGrid extends Component{
                     <Text 
                         numberOfLines={1}
                         ellipsizeMode='middle'
-                        style={rowId == activeIndex ? {color:rowData.color} : {color:'#999'}}
+                        style={rowData.id == activeId ? {color:rowData.color} : {color:'#999'}}
                     >{rowData.name}</Text>
                 </View>
             </TouchableHighlight>
@@ -131,12 +131,8 @@ class UpdateBillView extends Component{
         }
         return reg.test(money);
     }
-    _back(){
-        const {navigator} = this.props;
-        navigator.pop();
-    }
-    _addBill(){
-        let money = this.refs['money']._lastNativeText;
+    _saveBill(){
+        let money = this.refs['money']._lastNativeText || this.refs['money'].defaultValue;
         if(!this._checkMoney(money)){
             if(toastIsBusy) return false;
             Toast.show('你输入的金额有误',{
@@ -156,34 +152,28 @@ class UpdateBillView extends Component{
             return false;
         }
         money = parseFloat(money);
-        let { categoryList,dispatch ,navigator} = this.props;
+        let { categoryList,dispatch ,navigator,index,bill} = this.props;
         let category = categoryList[this.state.activeIndex];
-        console.log(category);
-        dispatch(actionCreater.addBill({
+        let newBill = Object.assign({},bill,{
             description:'',
-            time: new Date(),
+            updateTime: new Date(),
             money,
             category
-        }));
+        });
+        dispatch(actionCreater.updateBill(index,newBill));
         navigator.pop();
     }
-    _addCategory(){
-        this.props.navigator.push({
-            title:'添加分类',
-            Component: AddItem
-        });
-    }
-    _selectCategory(index,item){
+    _selectCategory(item){
         this.setState({
-            activeIndex: index,
+            activeId: item.id,
             activeColor: item.color,
             activeName: item.name,
             dataSource: dsCategory.cloneWithRows(this.props.categoryList)
         });
     }
     _generateHeader(){
-        const leftButton = (<CustomButton text='NAVITE' leftIcon={<Icon name="ios-arrow-back" size={20} color="#fff"/>} onPress={()=>this._backToNative()}/>);
-        const rightButton = <CustomButton text='记一笔' rightIcon={<Icon name="ios-paper-plane" size={20} color="#fff"/>} onPress={()=>this._addBill()}/>;
+        const leftButton = (<CustomButton text='列表' leftIcon={<Icon name="ios-arrow-back" size={20} color="#fff"/>} onPress={()=>this.props.navigator.pop()}/>);
+        const rightButton = <CustomButton text='保存' rightIcon={<Icon name="ios-paper-plane" size={20} color="#fff"/>} onPress={()=>this._saveBill()}/>;
         const customHeader = (<Header title={this.props.title} leftButton={leftButton} rightButton={rightButton}/>);
         return customHeader;
     }
@@ -231,19 +221,20 @@ class UpdateBillView extends Component{
                         placeholderTextColor="#ccc"
                         keyboardType="numeric"
                         underlineColorAndroid="transparent"
+                        defaultValue={this.props.bill.money}
                         maxLength={6}
-                        onSubmitEditing={()=>this._addBill()}
+                        onSubmitEditing={()=>this._saveBill()}
                     />
                 </View>
             </View>
         );
     }
-    _renderCategory(rowData,sectionId,rowId,hightRow){ 
+    _renderCategory(rowData,sectionId,rowId,hightRow){
         return (
             <CategoryGrid 
                 rowData={rowData}
                 rowId={rowId}
-                activeIndex={this.state.activeIndex}
+                activeId={this.state.activeId}
                 selectCategory={this._selectCategory.bind(this)}
             />);
     }
@@ -274,28 +265,24 @@ class UpdateBillView extends Component{
         return (
             <View style={{flex:1}}>
                 {this._generateHeader()}
-                {
-                    this._generateInput()
-                }
+                {this._generateInput()}
                 <View style={{flex:1}}>
-                    {
-                      <ListView 
-                            style={{flex:1}}
-                            enableEmptySections={true}
-                            contentContainerStyle={{
-                                flexDirection: 'row',
-                                flexWrap: 'wrap',
-                                alignItems: 'flex-start'
-                            }}
-                            keyboardDismissMode={'on-drag'}
-                            initialListSize = {15}
-                            pageSize = {5}
-                            dataSource = {dataSource}
-                            renderRow = {this._renderCategory.bind(this)}
-                        />
-                    }
-                   </View>
-               </View>
+                   <ListView 
+                        style={{flex:1}}
+                        enableEmptySections={true}
+                        contentContainerStyle={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            alignItems: 'flex-start'
+                        }}
+                        keyboardDismissMode={'on-drag'}
+                        initialListSize = {15}
+                        pageSize = {5}
+                        dataSource = {dataSource}
+                        renderRow = {this._renderCategory.bind(this)}
+                     />
+                </View>
+           </View>
         );
     }
 }
