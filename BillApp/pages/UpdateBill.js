@@ -26,13 +26,13 @@ class CategoryGrid extends Component{
     constructor(props){
         super(props);
         this.state = {
-            activeId: this.props.bill.id,
+            activeId: this.props.activeId,
             scaleAnim: new Animated.Value(1)
         };
     }
     _changeView(props){
-        let {rowId,rowData,activeIndex} = props;
-        if(rowId == activeIndex){
+        let {rowData,activeId} = props;
+        if(rowData.id == activeId){
             this.active = true;
             this.shouldupdate = true;
             Animated.timing(
@@ -121,7 +121,8 @@ class UpdateBillView extends Component{
     constructor(props){
         super(props);
         this.state = {
-            activeIndex:0
+            activeId:this.props.bill.category.id,
+            activeCategory:this.props.bill.category,
         };
     }
     _checkMoney(money){
@@ -132,7 +133,7 @@ class UpdateBillView extends Component{
         return reg.test(money);
     }
     _saveBill(){
-        let money = this.refs['money']._lastNativeText || this.refs['money'].defaultValue;
+        let money = this.refs['money']._lastNativeText || this.refs['money'].props.defaultValue;
         if(!this._checkMoney(money)){
             if(toastIsBusy) return false;
             Toast.show('你输入的金额有误',{
@@ -153,7 +154,7 @@ class UpdateBillView extends Component{
         }
         money = parseFloat(money);
         let { categoryList,dispatch ,navigator,index,bill} = this.props;
-        let category = categoryList[this.state.activeIndex];
+        let category = this.state.activeCategory;
         let newBill = Object.assign({},bill,{
             description:'',
             updateTime: new Date(),
@@ -165,6 +166,7 @@ class UpdateBillView extends Component{
     }
     _selectCategory(item){
         this.setState({
+            activeCategory:item,
             activeId: item.id,
             activeColor: item.color,
             activeName: item.name,
@@ -203,9 +205,8 @@ class UpdateBillView extends Component{
 
         let {activeColor,activeName} = this.state;
         if(!activeColor){
-            let item = this.props.categoryList[this.state.activeIndex];
-            activeColor = item.color;
-            activeName = item.name;
+            activeColor = this.props.bill.category.color;
+            activeName = this.props.bill.category.name;
         }
         return (
             <View style={[styles.inputContainer,{backgroundColor:activeColor}]}>
@@ -221,7 +222,7 @@ class UpdateBillView extends Component{
                         placeholderTextColor="#ccc"
                         keyboardType="numeric"
                         underlineColorAndroid="transparent"
-                        defaultValue={this.props.bill.money}
+                        defaultValue={String(this.props.bill.money)}
                         maxLength={6}
                         onSubmitEditing={()=>this._saveBill()}
                     />
@@ -233,7 +234,6 @@ class UpdateBillView extends Component{
         return (
             <CategoryGrid 
                 rowData={rowData}
-                rowId={rowId}
                 activeId={this.state.activeId}
                 selectCategory={this._selectCategory.bind(this)}
             />);
