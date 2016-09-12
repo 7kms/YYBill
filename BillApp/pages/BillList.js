@@ -71,7 +71,6 @@ class BillList extends Component{
     }
     _goUpdateBill(bill,index){
         let {navigator} = this.props;
-        console.log(bill);
         navigator.push({
             title: '账单修改',
             Component: UpdateBillView,
@@ -89,16 +88,11 @@ class BillList extends Component{
     }
     _backToNative(){
         console.log("back to native");
-
-        // let {ReactPage} = NativeModules;
-        // ReactPage.backToNative('react native','Beijing China',Date.now());
     }
     _renderRow(rowData, sectionID, rowID, highlightRow){
-        console.log("rendersection",rowData, sectionID, rowID, highlightRow);
         return (
             <TouchableHighlight
-                //activeOpacity={0.1}
-                onderlayColor="transparent"
+                underlayColor="transparent"
                 onPress={()=>{
                     this._goUpdateBill(rowData,rowID);
                 }}

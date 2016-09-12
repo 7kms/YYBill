@@ -4,162 +4,304 @@ import {
     View,
     Text,
     TextInput,
+    ListView,
+    Animated,
+    TouchableOpacity,
     TouchableHighlight
 } from 'react-native';
 import {connect} from 'react-redux';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { CustomButton } from '../Components/public/Button';
 import { Header } from '../Components/public/Header';
+import { CustomButton } from '../Components/public/Button';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Toast from 'react-native-root-toast';
+import AddItem from './AddItem';
 import actionCreater from '../Actions'
-import Utils from '../Utils';
-const styles = StyleSheet.create({
-    billContent:{
-        flex:1
-    },
-    labelContainer:{
-        flexDirection:'row',
-        alignItems:'center',
-        height: 60,
-    },
-    label:{
-        width:100,
-    },
-    textLabel:{
-        textAlign:'right',
-        color:'#777',
-        fontSize:16
-    },
-    input:{
-        flex:1,
-        marginHorizontal:20,
-    },
-    textInputStyle:{
-        height:40,
-        borderColor:Utils.selectedColor,
-        borderWidth: Utils.pixel
-    },
-    saveContent:{
-        flex:1,
-        height:60,
-        alignItems:'center',
-        justifyContent:'flex-end',
-    },
-    saveBtn:{
-        justifyContent:'center',
-        width:200,
-        height:40,
-        borderRadius:5,
-        marginBottom:100,
-        backgroundColor:Utils.themeColor,
-    },
-    saveText:{
-        fontSize:14,
-        fontWeight:'bold',
-        color:'#fff',
-        textAlign:'center',
-    }
+import Util from '../Utils';
+let toastIsBusy = false;
+let dsCategory = new ListView.DataSource({
+    rowHasChanged:(r1,r2)=> r1 !== r2
 });
-class WithLabel extends Component{
+
+class CategoryGrid extends Component{
     constructor(props){
         super(props);
+        this.state = {
+            activeIndex: this.props.activeIndex,
+            scaleAnim: new Animated.Value(1)
+        };
     }
+    _changeView(props){
+        let {rowId,rowData,activeIndex} = props;
+        if(rowId == activeIndex){
+            this.active = true;
+            this.shouldupdate = true;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1.5,
+                    duration:200,
+                },
+            ).start();
+        }else if(this.active){
+            this.shouldupdate = true;
+            this.active = false;
+            Animated.timing(
+                this.state.scaleAnim,
+                {
+                    toValue:1,
+                    duration:200,
+                },
+            ).start();
+        }else{
+            this.shouldupdate = false;
+        }
+    }
+    componentDidMount(){
+        this._changeView(this.props);
+    }
+    componentWillReceiveProps(nextProps){
+       this._changeView(nextProps);
+    }
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.shouldupdate;
+    }
+    _selectCategory(rowId,rowData){
+        if(!this.active){
+            this.active = true;
+            this.props.selectCategory(rowId,rowData);
+        }
+    } 
     render(){
-        return(
-            <View style={styles.labelContainer}>
-                <View style={styles.label}>
-                    <Text style={styles.textLabel}>{this.props.label}</Text>
+       let {rowId,rowData,activeIndex} = this.props;
+       const styles = StyleSheet.create({
+            iconWrap: {
+                justifyContent:'center',
+                alignItems:'center',
+                width:40,
+                height:40,
+                borderRadius:20
+            },
+            
+            iconface: {
+                transform:[
+                    {scale:this.state.scaleAnim.interpolate({
+                        inputRange:[1,2],
+                        outputRange:[1,2]
+                    })}
+                ]
+            }
+        });
+        return (
+            <TouchableHighlight 
+                onPress={()=>this._selectCategory(rowId,rowData)}
+                underlayColor="transparent"
+                accessibilityComponentType="button"
+                >
+                <View style={{width:Util.size.width/4,height:60,justifyContent:'center',alignItems:'center',marginBottom:10}}>
+                    <View style={styles.iconWrap}>
+                        <Animated.View style={ styles.iconface}>
+                            <Icon 
+                            name={rowData.iconName} 
+                            style={{textAlign:'center'}} 
+                            size={22} 
+                            color={rowData.color}/>
+                        </Animated.View>
+                    </View>
+                    <Text 
+                        numberOfLines={1}
+                        ellipsizeMode='middle'
+                        style={rowId == activeIndex ? {color:rowData.color} : {color:'#999'}}
+                    >{rowData.name}</Text>
                 </View>
-                <View style={styles.input}>
-                    {this.props.children}
-                </View>
-            </View>
+            </TouchableHighlight>
         );
     }
 }
 class UpdateBillView extends Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            activeIndex:0
+        };
+    }
+    _checkMoney(money){
+        var reg = /(^[1-9]\d*\.?\d*$)|(^0\.?\d*[1-9]\d*$)/;
+        if(typeof money == 'undefined'){
+            return false;
+        }
+        return reg.test(money);
+    }
     _back(){
         const {navigator} = this.props;
         navigator.pop();
     }
-    _deleteBill(){
-        const {navigator,dispatch,index} = this.props;
-        dispatch(actionCreater.deleteBill(index));
+    _addBill(){
+        let money = this.refs['money']._lastNativeText;
+        if(!this._checkMoney(money)){
+            if(toastIsBusy) return false;
+            Toast.show('你输入的金额有误',{
+                duration: Toast.durations.LONG,
+                position: Toast.positions.CENTER,
+                shadow: true,
+                animation: true,
+                hideOnPress: true,
+                delay: 0,
+                onShow(){
+                    toastIsBusy = true;
+                },
+                onHidden(){
+                    toastIsBusy = false;
+                }
+            });
+            return false;
+        }
+        money = parseFloat(money);
+        let { categoryList,dispatch ,navigator} = this.props;
+        let category = categoryList[this.state.activeIndex];
+        console.log(category);
+        dispatch(actionCreater.addBill({
+            description:'',
+            time: new Date(),
+            money,
+            category
+        }));
         navigator.pop();
     }
-    _saveBill(){
-        const {navigator,dispatch,index,bill} = this.props;
-        let money = this.refs['money']._lastNativeText || bill.money;
-        let category = this.refs['category']._lastNativeText || bill.category;
-        let description = this.refs['description']._lastNativeText || bill.description;
-        let tempBill = {
-            money,
-            category,
-            description,
-            time: bill.time
-        };
-        tempBill.money = parseFloat(tempBill.money);
-        dispatch(actionCreater.updateBill(index,tempBill));
-        navigator.pop();
+    _addCategory(){
+        this.props.navigator.push({
+            title:'添加分类',
+            Component: AddItem
+        });
+    }
+    _selectCategory(index,item){
+        this.setState({
+            activeIndex: index,
+            activeColor: item.color,
+            activeName: item.name,
+            dataSource: dsCategory.cloneWithRows(this.props.categoryList)
+        });
     }
     _generateHeader(){
-        const leftButton = (<CustomButton text='BACK' leftIcon={<Icon name="ios-arrow-back" size={20} color="#fff"/>} onPress={()=>this._back()}/>);
-        const rightButton = <CustomButton text='删除' rightIcon={<Icon name="ios-paper-plane" size={20} color="#fff"/>} onPress={()=>this._deleteBill()}/>;
+        const leftButton = (<CustomButton text='NAVITE' leftIcon={<Icon name="ios-arrow-back" size={20} color="#fff"/>} onPress={()=>this._backToNative()}/>);
+        const rightButton = <CustomButton text='记一笔' rightIcon={<Icon name="ios-paper-plane" size={20} color="#fff"/>} onPress={()=>this._addBill()}/>;
         const customHeader = (<Header title={this.props.title} leftButton={leftButton} rightButton={rightButton}/>);
         return customHeader;
     }
-    render(){
-        let {bill} = this.props;
+    _generateInput(){
+        const styles = StyleSheet.create({
+            inputContainer:{
+                height:80,
+                flexDirection:'row',
+                alignItems:'center'
+            },
+            item:{
+                width:100,
+                textAlign:'center',
+                fontSize:20,
+                color:'#fff'
+            },
+            inputTextStyle:{
+                height: 80,
+                marginRight:15,
+                fontSize:30,
+                textAlign:'right',
+                color:'#fff',
+                borderWidth:0,
+                borderColor:'transparent'
+            }
+        });
+
+        let {activeColor,activeName} = this.state;
+        if(!activeColor){
+            let item = this.props.categoryList[this.state.activeIndex];
+            activeColor = item.color;
+            activeName = item.name;
+        }
         return (
-            <View style={{flex:1}}>
-                {this._generateHeader()}
-                <View style={styles.billContent}>
-                    <WithLabel label="消费金额:">
-                        <TextInput 
-                            style={styles.textInputStyle}
-                            ref='money'
-                            autoCapitalize='none'
-                            keyboardType='numeric'
-                            maxLength={5}
-                            clearButtonMode='while-editing'
-                            placeholder="请输入$$"
-                            defaultValue = {String(bill.money)}
-                        />
-                    </WithLabel>
-                     <WithLabel label="消费项目:">
-                        <TextInput 
-                            style={styles.textInputStyle}
-                            ref='category'
-                            placeholder='category'
-                            defaultValue = {bill.category}
-                        />
-                    </WithLabel>
-                    <WithLabel label="描述:">
-                        <TextInput 
-                            style={styles.textInputStyle}
-                            ref='description'
-                            multiline={true}
-                            placeholder='description'
-                            defaultValue = {bill.description}
-                        />
-                    </WithLabel>
-                    <View style={styles.saveContent}>
-                        <TouchableHighlight
-                        activeOpacity={0.8}
-                        underlayColor={Utils.selectedColor}
-                        onPress={()=>this._saveBill()}
-                        style={styles.saveBtn}
-                    >
-                        <Text style={styles.saveText}>
-                            保存修改
-                        </Text>
-                    </TouchableHighlight>
-                    </View>
-                    
+            <View style={[styles.inputContainer,{backgroundColor:activeColor}]}>
+                <View>
+                    <Text  style={styles.item}>{activeName}</Text>
+                </View>
+                <View style={{flex:1}}>
+                    <TextInput 
+                        ref='money'
+                        style={styles.inputTextStyle}
+                        autoCapitalize="none"
+                        placeholder="0.00"
+                        placeholderTextColor="#ccc"
+                        keyboardType="numeric"
+                        underlineColorAndroid="transparent"
+                        maxLength={6}
+                        onSubmitEditing={()=>this._addBill()}
+                    />
                 </View>
             </View>
         );
     }
+    _renderCategory(rowData,sectionId,rowId,hightRow){ 
+        return (
+            <CategoryGrid 
+                rowData={rowData}
+                rowId={rowId}
+                activeIndex={this.state.activeIndex}
+                selectCategory={this._selectCategory.bind(this)}
+            />);
+    }
+    componentWillMount(){
+        let { dispatch } = this.props;
+        dispatch(actionCreater.getCategoryList());
+    }
+    render(){
+        let styles = StyleSheet.create({
+            emptyWrap:{
+                flex:1,
+                alignItems:'center',
+                justifyContent:'center'
+            },
+            btn:{
+                paddingHorizontal:20,
+                paddingVertical:10,
+                backgroundColor:Util.themeColor,
+                borderRadius:10,
+                overflow:'hidden'
+            },
+            text:{
+                fontSize:18,
+                color:'#fff',
+            }
+        });
+        let dataSource =  dsCategory.cloneWithRows(this.props.categoryList);
+        return (
+            <View style={{flex:1}}>
+                {this._generateHeader()}
+                {
+                    this._generateInput()
+                }
+                <View style={{flex:1}}>
+                    {
+                      <ListView 
+                            style={{flex:1}}
+                            enableEmptySections={true}
+                            contentContainerStyle={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                                alignItems: 'flex-start'
+                            }}
+                            keyboardDismissMode={'on-drag'}
+                            initialListSize = {15}
+                            pageSize = {5}
+                            dataSource = {dataSource}
+                            renderRow = {this._renderCategory.bind(this)}
+                        />
+                    }
+                   </View>
+               </View>
+        );
+    }
 }
 export default connect(state=>{
-    return {}
+    const {categoryList} = state;
+    return {
+        categoryList
+    }
 })(UpdateBillView);
