@@ -1,8 +1,5 @@
 import React,{Component} from 'react';
 import {
-    View,
-    StatusBar,
-    Text,
     StyleSheet
 } from 'react-native';
 import { connect } from 'react-redux';
@@ -11,6 +8,7 @@ import BillListView from './BillList';
 import Finance from './Finance';
 import Charts from './Charts';
 import More from './More';
+import Drawer from './Drawer';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TabNavigator from 'react-native-tab-navigator';
 
@@ -27,6 +25,8 @@ const styles = StyleSheet.create({
         color:Utils.themeColor
     }
 });
+
+//
 class MainPage extends Component{
     _changeTab(tag){
         let{dispatch} = this.props;
@@ -60,6 +60,7 @@ class MainPage extends Component{
         let {tabStatus,navigator} = this.props;
         let iconSize = 25;
         return (
+            <Drawer>
                 <TabNavigator>
                     <TabNavigator.Item
                         titleStyle={styles.normal}
@@ -112,6 +113,8 @@ class MainPage extends Component{
                        }
                     </TabNavigator.Item>
                 </TabNavigator>
+            </Drawer>
+          
         );
     }
 }

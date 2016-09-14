@@ -4,7 +4,7 @@ import {
     StatusBar,
     Navigator,
     BackAndroid,
-    ToastAndroid
+    ToastAndroid,
 } from 'react-native';
 import Launch from './Launch';
 import Util from '../Utils';
@@ -14,6 +14,7 @@ let defaultStatusBar = {
                         animate: true,
                         translucent: true
                     };
+                   
 class App extends Component{
     constructor(props){
         super(props);
@@ -51,7 +52,7 @@ class App extends Component{
     render(){
         return(
             //创建应用的根导航(路由)
-            <Navigator
+         <Navigator
                 ref={(navigator)=>{
                     App.navigator = navigator;
                 }}
@@ -76,7 +77,7 @@ class App extends Component{
                 renderScene={(route,navigator)=>{
                     let {Component,title,statusBarStyle} = route;
                     let finallyStatusBar =  Object.assign({},defaultStatusBar,statusBarStyle);
-                   // console.log(finallyStatusBar,statusBarStyle);
+                // console.log(finallyStatusBar,statusBarStyle);
                     return (
                         <View style={{flex:1}}>
                             <StatusBar {...finallyStatusBar}/>
@@ -84,8 +85,8 @@ class App extends Component{
                         </View>
                     );
                 }}
-
             />
+           
         );
     }
 }

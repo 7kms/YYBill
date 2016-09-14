@@ -55,7 +55,8 @@ var schemas = [
 // 第一个架构将会被更新到现有的架构版本
 // 因为第一个架构位于数组顶部
 var nextSchemaIndex = Realm.schemaVersion(Realm.defaultPath);
-while (nextSchemaIndex < schemas.length) {
+console.log(nextSchemaIndex);
+while (nextSchemaIndex >=0 && nextSchemaIndex < schemas.length) {
   var migratedRealm = new Realm(schemas[nextSchemaIndex++]);
   migratedRealm.close();
 }
