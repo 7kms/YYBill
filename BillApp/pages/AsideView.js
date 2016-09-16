@@ -1,20 +1,39 @@
 import React,{Component} from 'react';
-import { View,Text } from 'react-native';
-
-export default class AsideView extends Component{
+import {
+  View,
+  Text,
+  ListView,
+  StyleSheet
+} from 'react-native';
+const ds = new ListView.DataSource({rowHasChanged:(r1,r2) => r1!==r2});
+class AsideView extends Component{
     constructor(props){
         super(props);
     }
+    _renderRow(rowData,sectionId,rowId){
+      return(
+        <Text>rowData</Text>
+      );
+    }
     render(){
         return (
-            <View style={{flex: 1, alignItems: 'center',backgroundColor:'#53cac3'}}>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'right'}}>记事本1</Text>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'right'}}>记事本2</Text>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'right'}}>记事本1</Text>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'right'}}>记事本2</Text>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'right'}}>记事本1</Text>
-                <Text style={{margin: 10, fontSize: 15, textAlign: 'right'}}>记事本2</Text>
-             </View>
+            <View style={styles.drawerContainer}>
+              <ListView
+                contentContainerStyle={styles.listStyle}
+                dataSource={ds.cloneWithRows(this.props.BillModul)}
+                renderRow={this._renderRow.bind(this)}
+                />
+            </View>
         );
     }
 }
+const styles = StyleSheet.create({
+  drawerContainer:{
+    flex:1,
+    backgroundColor:'#fff'
+  },
+  listStyle:{
+
+  }
+});
+export default AsideView;

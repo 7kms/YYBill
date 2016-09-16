@@ -86,8 +86,8 @@ class BillList extends Component{
             Component: AddBill
         });
     }
-    _backToNative(){
-        console.log("back to native");
+    _openDrawer(){
+        this.props.openDrawer();
     }
     _renderRow(rowData, sectionID, rowID, highlightRow){
         return (
@@ -102,7 +102,7 @@ class BillList extends Component{
                         <View style={styles.billItem}>
                             <Text style={styles.itemDfn}>金额</Text>
                             <Text style={{color:'#ff9340'}}>{rowData.money}</Text>
-                        </View> 
+                        </View>
                         <View style={styles.billItem}>
                              <Text style={styles.itemDfn}>分类</Text>
                              <View>
@@ -114,14 +114,14 @@ class BillList extends Component{
                             <Text style={styles.itemDfn}>时间</Text>
                             <Text style={{color:'#777'}}>{rowData.time.getMonth()+1 + '月' + rowData.time.getDate() + '日'}</Text>
                         </View>
-                    </View>                   
+                    </View>
                     <View style={styles.billDesc}>
                         <Text style={{flex:1,textAlign:'center',color:'#777'}}>备注</Text>
                         <Text style={{flex:2,textAlign:'right',marginRight:10,color:'#777'}} numberOfLines={1}>{rowData.description}</Text>
                     </View>
                 </View>
             </TouchableHighlight>
-            
+
         );
     }
     _renderSection(sectionData, sectionID){
@@ -129,7 +129,7 @@ class BillList extends Component{
         return (
            <View style={styles.sectionTitle}>
              <Text style={styles.titleText}>{sectionID}</Text>
-           </View> 
+           </View>
         );
     }
     _renderListView(){
@@ -138,7 +138,7 @@ class BillList extends Component{
         if(billList.name){
             dataSource = ds.cloneWithRowsAndSections({
                 [billList.name]: billList.items
-            }); 
+            });
             total = billList.items.length;
         }
         let listView = total >0 ? (
@@ -159,8 +159,8 @@ class BillList extends Component{
         );
         return listView;
     }
-     _generateHeader(){
-        const leftButton = (<CustomButton text='NAVITE' leftIcon={<Icon name="ios-arrow-back" size={20} color="#fff"/>} onPress={()=>this._backToNative()}/>);
+    _generateHeader(){
+        const leftButton = (<CustomButton text='抽屉' leftIcon={<Icon name="logo-buffer" size={20} color="#fff"/>} onPress={()=>this._openDrawer()}/>);
         const rightButton = <CustomButton text='记一笔' rightIcon={<Icon name="ios-paper-plane" size={20} color="#fff"/>} onPress={()=>this._addBill()}/>;
         const customHeader = (<Header title={this.props.title} leftButton={leftButton} rightButton={rightButton}/>);
         return customHeader;

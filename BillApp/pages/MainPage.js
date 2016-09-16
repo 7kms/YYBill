@@ -56,11 +56,17 @@ class MainPage extends Component{
         };
         dispatch(actionCreaters.changeTab({...Tabs,...currentTab}));
     }
+    _setDrawer(drawer){
+      this.drawer = drawer;
+    }
+    _openDrawer(){
+      this.drawer.openDrawer();
+    }
     render(){
         let {tabStatus,navigator} = this.props;
         let iconSize = 25;
         return (
-            <Drawer>
+            <Drawer setDrawer={(drawer)=>this._setDrawer(drawer)}>
                 <TabNavigator>
                     <TabNavigator.Item
                         titleStyle={styles.normal}
@@ -72,7 +78,7 @@ class MainPage extends Component{
                         onPress={() => this._changeTab('billList')}
                         >
                         {
-                            <BillListView navigator={navigator} title="账单"/>
+                            <BillListView navigator={navigator} title="账单" openDrawer={()=>this._openDrawer()}/>
                         }
                     </TabNavigator.Item>
                     <TabNavigator.Item
@@ -90,19 +96,6 @@ class MainPage extends Component{
                     <TabNavigator.Item
                         titleStyle={styles.normal}
                         selectedTitleStyle={styles.active}
-                        selected={tabStatus.more.selected}
-                        title="更多"
-                        renderIcon={() => <Icon name="ios-at-outline" style={styles.itemIcon} size={iconSize} color='#999'/>}
-                        renderSelectedIcon={() => <Icon name="ios-at" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
-                        onPress={() => this._changeTab('more')}>
-
-                        {
-                            <More />  
-                        }
-                    </TabNavigator.Item>
-                    <TabNavigator.Item
-                        titleStyle={styles.normal}
-                        selectedTitleStyle={styles.active}
                         selected={tabStatus.chart.selected}
                         title="报表"
                         renderIcon={() => <Icon name="ios-pulse-outline" style={styles.itemIcon} size={iconSize} color='#999'/>}
@@ -112,9 +105,23 @@ class MainPage extends Component{
                         <Charts />
                        }
                     </TabNavigator.Item>
+                    <TabNavigator.Item
+                        titleStyle={styles.normal}
+                        selectedTitleStyle={styles.active}
+                        selected={tabStatus.more.selected}
+                        title="我的"
+                        renderIcon={() => <Icon name="ios-at-outline" style={styles.itemIcon} size={iconSize} color='#999'/>}
+                        renderSelectedIcon={() => <Icon name="ios-at" style={styles.itemIcon} size={iconSize} color={Utils.themeColor}/>}
+                        onPress={() => this._changeTab('more')}>
+
+                        {
+                            <More />
+                        }
+                    </TabNavigator.Item>
+
                 </TabNavigator>
             </Drawer>
-          
+
         );
     }
 }
@@ -124,5 +131,3 @@ export default connect((state)=>{
         tabStatus
     }
 })(MainPage);
-
-

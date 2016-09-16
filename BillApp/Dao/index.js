@@ -33,7 +33,7 @@ const BillListSchema = {
 };
 var schemas = [
   {
-    schema:[ BillSchema, BillListSchema,CategorySchema],
+    schema:[BillSchema,BillListSchema,CategorySchema],
     schemaVersion: 7,
     migration: function(oldRealm, newRealm) {
         let category = newRealm.objects('Category')[0];
@@ -41,7 +41,7 @@ var schemas = [
         if (oldRealm.schemaVersion < 7) {
             var oldObjects = oldRealm.objects('Bill');
             var newObjects = newRealm.objects('Bill');
-            // 遍历所有对象，然后设置新架构中的 updateTime 
+            // 遍历所有对象，然后设置新架构中的 updateTime
             for (var i = 0; i < oldObjects.length; i++) {
                 if(!oldObjects[i].category){
                     newObjects[i].category = category;
