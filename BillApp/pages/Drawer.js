@@ -16,7 +16,7 @@ class Drawer extends Component{
                   }}
                   drawerWidth={300}
                   drawerPosition={DrawerLayoutAndroid.positions.Left}
-                  renderNavigationView={() =><AsideView/>}
+                  renderNavigationView={() =><AsideView />}
                   >
                   {this.props.children}
               </DrawerLayoutAndroid>

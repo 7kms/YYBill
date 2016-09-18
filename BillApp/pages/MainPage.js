@@ -126,8 +126,9 @@ class MainPage extends Component{
     }
 }
 export default connect((state)=>{
-    const {tabStatus} = state;
+    const {tabStatus,billList} = state;
     return{
-        tabStatus
+        tabStatus,
+        billList
     }
 })(MainPage);
